@@ -23,7 +23,9 @@ def skip_notifications_fixture():
 @pytest.fixture(name="bypass_get_data")
 def bypass_get_data_fixture():
     """Skip calls to get data from API."""
-    with patch("custom_components.brunata_online.BrunataOnlineApiClient.async_get_data"):
+    with patch(
+        "custom_components.brunata_online.BrunataOnlineApiClient.async_get_data"
+    ):
         yield
 
 
