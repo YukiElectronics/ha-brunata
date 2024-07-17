@@ -3,7 +3,7 @@
 NAME = "Brunata Online"
 DOMAIN = "brunata_online"
 DOMAIN_DATA = f"{DOMAIN}_data"
-VERSION = "0.0.0"
+VERSION = "0.9.0"
 
 ATTRIBUTION = "Data provided by http://jsonplaceholder.typicode.com/"
 ISSUE_URL = "https://github.com/YukiElectronics/brunata-online/issues"

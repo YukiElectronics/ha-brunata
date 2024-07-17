@@ -1,25 +1,11 @@
 """Test Brunata Online config flow."""
 from unittest.mock import patch
 
+from homeassistant import config_entries, data_entry_flow
 import pytest
-from custom_components.brunata_online.const import (
-    BINARY_SENSOR,
-)
-from custom_components.brunata_online.const import (
-    DOMAIN,
-)
-from custom_components.brunata_online.const import (
-    PLATFORMS,
-)
-from custom_components.brunata_online.const import (
-    SENSOR,
-)
-from custom_components.brunata_online.const import (
-    SWITCH,
-)
-from homeassistant import config_entries
-from homeassistant import data_entry_flow
 from pytest_homeassistant_custom_component.common import MockConfigEntry
+
+from custom_components.brunata_online.const import BINARY_SENSOR, DOMAIN, PLATFORMS, SENSOR, SWITCH
 
 from .const import MOCK_CONFIG
 
