@@ -1,4 +1,5 @@
 """Global fixtures for Brunata Online integration."""
+
 from unittest.mock import patch
 
 import pytest

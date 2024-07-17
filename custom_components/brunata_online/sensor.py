@@ -1,4 +1,5 @@
 """Sensor platform for Brunata Online."""
+
 from .const import DEFAULT_NAME, DOMAIN, ICON, SENSOR
 from .entity import BrunataOnlineEntity
 

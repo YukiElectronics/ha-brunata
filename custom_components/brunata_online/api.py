@@ -1,4 +1,5 @@
 """ Brunata Online API Client """
+
 import asyncio
 import base64
 from datetime import datetime, timedelta
@@ -12,7 +13,15 @@ import urllib.parse
 import aiohttp
 import async_timeout
 
-from .const import B2C_URL, BASE_URL, CLIENT_ID, HEADERS, OAUTH2_PROFILE, OAUTH2_URL, REDIRECT
+from .const import (
+    B2C_URL,
+    BASE_URL,
+    CLIENT_ID,
+    HEADERS,
+    OAUTH2_PROFILE,
+    OAUTH2_URL,
+    REDIRECT,
+)
 
 TIMEOUT = 10
 _LOGGER: logging.Logger = logging.getLogger(__package__)

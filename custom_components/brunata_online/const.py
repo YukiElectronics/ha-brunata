@@ -1,4 +1,5 @@
 """Constants for Brunata Online."""
+
 # Base component constants
 NAME = "Brunata Online"
 DOMAIN = "brunata_online"

@@ -1,4 +1,5 @@
 """Tests for Brunata Online api."""
+
 import asyncio
 
 import aiohttp

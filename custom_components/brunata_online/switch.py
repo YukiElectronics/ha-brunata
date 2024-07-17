@@ -1,4 +1,5 @@
 """Switch platform for Brunata Online."""
+
 from homeassistant.components.switch import SwitchEntity
 
 from .const import DEFAULT_NAME, DOMAIN, ICON, SWITCH
