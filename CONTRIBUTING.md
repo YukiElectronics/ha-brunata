@@ -83,7 +83,11 @@ your changes to the integration.
 ## Pre-commit
 
 You can use the [pre-commit](https://pre-commit.com/) settings included in the
-repostory to have code style and linting checks.
+repostory to have code style and linting checks. You can install `pre-commit` like so:
+
+```console
+$ python3 -m pip install pre-commit
+```
 
 With `pre-commit` tool already installed,
 activate the settings of the repository:

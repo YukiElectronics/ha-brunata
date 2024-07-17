@@ -1,65 +1,36 @@
-# Brunata Online
+# Brunata Online Custom Integration for Home Assistant
 
-[![GitHub Release][releases-shield]][releases]
-[![GitHub Activity][commits-shield]][commits]
-[![License][license-shield]](LICENSE)
+## ⚠️ This integration is still a work in progress, and may not work as intended
 
-[![pre-commit][pre-commit-shield]][pre-commit]
-[![Black][black-shield]][black]
+Furthermore, this integration is not endorsed by Brunata, and could stop functioning at any time at their behest; your Brunata account might also be closed, although no EULA is provided for the Brunata Online Portal at the time of writing
 
 [![hacs][hacsbadge]][hacs]
-[![Project Maintenance][maintenance-shield]][user_profile]
-[![BuyMeCoffee][buymecoffeebadge]][buymecoffee]
+[![GitHub Release][releases-shield]][releases]
+[![License][license-shield]](LICENSE)
+<!-- Sponsors -->
+[![ko-fi][kofi_badge]](https://ko-fi.com/X8X3205KS)
 
-[![Discord][discord-shield]][discord]
-[![Community Forum][forum-shield]][forum]
+## ⚠️ Please ensure your Brunata credentials work on [online.brunata.com][brunata]
 
-**TO BE REMOVED: If you need help, as a developer, to use this custom component tempalte,
-please look at the [User Guide in the Cookiecutter documentation](https://cookiecutter-homeassistant-custom-component.readthedocs.io/en/stable/quickstart.html)**
+If your credentials don't work **AND** you use a different Brunata portal to view your metrics, please open a pull request and/or contact me on the [Home Assistant Forum][ha_profile].
 
-**This component will set up the following platforms.**
+In most cases, you will likely have to add support for alternate portals yourself; I will gladly assist you in getting the login-flow working and finding the API endpoints. Then you can simply submit a Pull Request, and I'll review it when I have time 🙂
 
-| Platform        | Description                         |
-| --------------- | ----------------------------------- |
-| `binary_sensor` | Show something `True` or `False`.   |
-| `sensor`        | Show info from Brunata Online API.  |
-| `switch`        | Switch something `True` or `False`. |
+---
 
-![example][exampleimg]
+This integration allows Home Assistant to read meter values from the [Brunata Online][brunata] Portal.
+Brunata is a "IoT-enabled" utilities provider that's part of the "Minol-ZENNER Group", mostly providing utilities to housing cooperatives in the EEA
 
-## Installation
+#### The integration can fetch the following metrics
 
-1. Using the tool of choice open the directory (folder) for your HA configuration (where you find `configuration.yaml`).
-2. If you do not have a `custom_components` directory (folder) there, you need to create it.
-3. In the `custom_components` directory (folder) create a new folder called `brunata_online`.
-4. Download _all_ the files from the `custom_components/brunata_online/` directory (folder) in this repository.
-5. Place the files you downloaded in the new directory (folder) you created.
-6. Restart Home Assistant
-7. In the HA UI go to "Configuration" -> "Integrations" click "+" and search for "Brunata Online"
+- Available meter types (⚠️Only tested on my own account)
+- ⚡ Energy meter
+<!-- 💧 Water meter (TBI)
+- 🔥 Hot water and/or gas meter (TBI)-->
 
-Using your HA configuration directory (folder) as a starting point you should now also have this:
+#### The following Home Assistant sensors have been implemented
 
-```text
-custom_components/brunata_online/translations/en.json
-custom_components/brunata_online/translations/fr.json
-custom_components/brunata_online/translations/nb.json
-custom_components/brunata_online/translations/sensor.en.json
-custom_components/brunata_online/translations/sensor.fr.json
-custom_components/brunata_online/translations/sensor.nb.json
-custom_components/brunata_online/translations/sensor.nb.json
-custom_components/brunata_online/__init__.py
-custom_components/brunata_online/api.py
-custom_components/brunata_online/binary_sensor.py
-custom_components/brunata_online/config_flow.py
-custom_components/brunata_online/const.py
-custom_components/brunata_online/manifest.json
-custom_components/brunata_online/sensor.py
-custom_components/brunata_online/switch.py
-```
-
-## Configuration is done in the UI
-
-<!---->
+⚠️ No sensors have been implemented yet
 
 ## Contributions are welcome!
 
@@ -67,30 +38,22 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 
 ## Credits
 
-This project was generated from [@oncleben31](https://github.com/oncleben31)'s [Home Assistant Custom Component Cookiecutter](https://github.com/oncleben31/cookiecutter-homeassistant-custom-component) template.
+This project was generated from [@oncleben31](https://github.com/oncleben31)'s [Home Assistant Custom Component Cookiecutter][custom_component] template.
 
 Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [integration_blueprint][integration_blueprint] template
 
+Active Directory B2C Login-flow was mostly based on [@itchannel](https://github.com/itchannel)'s [FordPass Integration][fordpass]
+
 ---
 
+[brunata]: https://online.brunata.com
+[custom_component]: https://github.com/oncleben31/cookiecutter-homeassistant-custom-component
 [integration_blueprint]: https://github.com/custom-components/integration_blueprint
-[black]: https://github.com/psf/black
-[black-shield]: https://img.shields.io/badge/code%20style-black-000000.svg?style=for-the-badge
-[buymecoffee]: https://www.buymeacoffee.com/YukiElectronics
-[buymecoffeebadge]: https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=for-the-badge
-[commits-shield]: https://img.shields.io/github/commit-activity/y/YukiElectronics/brunata-online.svg?style=for-the-badge
-[commits]: https://github.com/YukiElectronics/brunata-online/commits/main
+[fordpass]: https://github.com/itchannel/fordpass-ha
+[ha_profile]: https://community.home-assistant.io/u/YukiElectronics
+[kofi_badge]: https://ko-fi.com/img/githubbutton_sm.svg
 [hacs]: https://hacs.xyz
 [hacsbadge]: https://img.shields.io/badge/HACS-Custom-orange.svg?style=for-the-badge
-[discord]: https://discord.gg/Qa5fW2R
-[discord-shield]: https://img.shields.io/discord/330944238910963714.svg?style=for-the-badge
-[exampleimg]: example.png
-[forum-shield]: https://img.shields.io/badge/community-forum-brightgreen.svg?style=for-the-badge
-[forum]: https://community.home-assistant.io/
-[license-shield]: https://img.shields.io/github/license/YukiElectronics/brunata-online.svg?style=for-the-badge
-[maintenance-shield]: https://img.shields.io/badge/maintainer-%40YukiElectronics-blue.svg?style=for-the-badge
-[pre-commit]: https://github.com/pre-commit/pre-commit
-[pre-commit-shield]: https://img.shields.io/badge/pre--commit-enabled-brightgreen?style=for-the-badge
-[releases-shield]: https://img.shields.io/github/release/YukiElectronics/brunata-online.svg?style=for-the-badge
-[releases]: https://github.com/YukiElectronics/brunata-online/releases
-[user_profile]: https://github.com/YukiElectronics
+[license-shield]: https://img.shields.io/github/license/YukiElectronics/ha-brunata.svg?style=for-the-badge
+[releases-shield]: https://img.shields.io/github/release/YukiElectronics/ha-brunata.svg?style=for-the-badge
+[releases]: https://github.com/YukiElectronics/ha-brunata/releases
