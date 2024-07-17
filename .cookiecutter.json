@@ -1,0 +1,13 @@
+{
+	"_checkout": "2021.1.1",
+	"_output_dir": "A:\\Code\\_Personal\\Brunata",
+	"_repo_dir": "C:\\Users\\ehe\\.cookiecutters\\cookiecutter-homeassistant-custom-component",
+	"_template": "gh:oncleben31/cookiecutter-homeassistant-custom-component",
+	"class_name_prefix": "BrunataOnline",
+	"domain_name": "brunata_online",
+	"friendly_name": "Brunata Online",
+	"github_user": "YukiElectronics",
+	"project_name": "brunata-online",
+	"test_suite": "yes",
+	"version": "0.0.0"
+}
