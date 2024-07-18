@@ -1,5 +1,7 @@
 """Constants for Brunata Online."""
 
+from enum import Enum
+
 # Base component constants
 NAME = "Brunata Online"
 DOMAIN = "brunata_online"
@@ -7,7 +9,7 @@ DOMAIN_DATA = f"{DOMAIN}_data"
 VERSION = "0.9.0"
 
 ATTRIBUTION = "Data provided by http://jsonplaceholder.typicode.com/"
-ISSUE_URL = "https://github.com/YukiElectronics/brunata-online/issues"
+ISSUE_URL = "https://github.com/YukiElectronics/ha-brunata/issues"
 
 # Icons
 ICON = "mdi:format-quote-close"
@@ -59,3 +61,14 @@ If you have any issues with this you need to open an issue here:
 {ISSUE_URL}
 -------------------------------------------------------------------
 """
+
+
+class ConsumptionType(Enum):
+    POWER = "E"
+    WATER = "V"
+    HEATING = "W"
+
+
+class Interval(Enum):
+    DAY = "D"
+    MONTH = "M"
