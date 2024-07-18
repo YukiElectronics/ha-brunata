@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Brunata Online",
-        "description": "If you need help with the configuration have a look here: https://github.com/YukiElectronics/brunata-online",
+        "description": "If you need help with the configuration have a look here: https://github.com/YukiElectronics/ha-brunata",
         "data": {
           "username": "Username",
           "password": "Password"

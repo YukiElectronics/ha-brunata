@@ -1,0 +1,31 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Brunata Online",
+        "description": "Hvis du skal bruge hjælp til konfigurationen, så se her: https://github.com/YukiElectronics/ha-brunata",
+        "data": {
+          "username": "Brugernavn",
+          "password": "Adgangskode"
+        }
+      }
+    },
+    "error": {
+      "auth": "Brugernavn/Adgangskode er forkert."
+    },
+    "abort": {
+      "single_instance_allowed": "Denne integration kan kun konfigureres en gang."
+    }
+  },
+  "options": {
+    "step": {
+      "user": {
+        "data": {
+          "binary_sensor": "Binær sensor aktiveret",
+          "sensor": "Sensor aktiveret",
+          "switch": "Afbryder aktiveret"
+        }
+      }
+    }
+  }
+}

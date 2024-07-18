@@ -7,7 +7,9 @@ Furthermore, this integration is not endorsed by Brunata, and could stop functio
 [![hacs][hacsbadge]][hacs]
 [![GitHub Release][releases-shield]][releases]
 [![License][license-shield]](LICENSE)
+
 <!-- Sponsors -->
+
 [![ko-fi][kofi_badge]](https://ko-fi.com/X8X3205KS)
 
 ## ⚠️ Please ensure your Brunata credentials work on [online.brunata.com][brunata]

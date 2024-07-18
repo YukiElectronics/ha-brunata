@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "Brunata Online",
-        "description": "Hvis du trenger hjep til konfigurasjon ta en titt her: https://github.com/YukiElectronics/brunata-online",
+        "description": "Hvis du trenger hjep til konfigurasjon ta en titt her: https://github.com/YukiElectronics/ha-brunata",
         "data": {
           "username": "Brukernavn",
           "password": "Passord"
