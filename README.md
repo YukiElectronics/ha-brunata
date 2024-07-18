@@ -12,7 +12,7 @@ Furthermore, this integration is not endorsed by Brunata, and could stop functio
 
 [![ko-fi][kofi_badge]](https://ko-fi.com/X8X3205KS)
 
-## ⚠️ Please ensure your Brunata credentials work on [online.brunata.com][brunata]
+## ⚠️ Please ensure your Brunata credentials work on [online.brunata.com][brunata] ⚠️
 
 If your credentials don't work **AND** you use a different Brunata portal to view your metrics, please open a pull request and/or contact me on the [Home Assistant Forum][ha_profile].
 
@@ -23,16 +23,29 @@ In most cases, you will likely have to add support for alternate portals yoursel
 This integration allows Home Assistant to read meter values from the [Brunata Online][brunata] Portal.
 Brunata is a "IoT-enabled" utilities provider that's part of the "Minol-ZENNER Group", mostly providing utilities to housing cooperatives in the EEA
 
+### ✨ Planned Features
+
+- [ ] Add support for more metrics
+
+  - [ ] 💧 Water consumption
+
+  - [ ] 🔥 District heating / gas consumption
+
+- [ ] Expose metrics as Home Assistant sensors
+
+- [ ] Configure Python tests
+
+- [ ] Support writing historical metrics to sensor
+
 #### The integration can fetch the following metrics
 
-- Available meter types (⚠️Only tested on my own account)
+- 📊 Available meter types — ⚠️ Only tested on my own account ⚠️
+
 - ⚡ Energy meter
-<!-- 💧 Water meter (TBI)
-- 🔥 Hot water and/or gas meter (TBI)-->
 
 #### The following Home Assistant sensors have been implemented
 
-⚠️ No sensors have been implemented yet
+⚠️ No sensors have been implemented yet ⚠️
 
 ## Contributions are welcome!
 
@@ -40,7 +53,7 @@ If you want to contribute to this please read the [Contribution guidelines](CONT
 
 ## Credits
 
-This project was generated from [@oncleben31](https://github.com/oncleben31)'s [Home Assistant Custom Component Cookiecutter][custom_component] template.
+This project was generated from [@oncleben31](https://github.com/oncleben31)'s [Home Assistant Custom Component Cookiecutter][custom_component] template
 
 Code template was mainly taken from [@Ludeeus](https://github.com/ludeeus)'s [integration_blueprint][integration_blueprint] template
 
