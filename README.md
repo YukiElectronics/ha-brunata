@@ -1,9 +1,5 @@
 # Brunata Online Custom Integration for Home Assistant
 
-## ⚠️ This integration is still a work in progress, and may not work as intended
-
-Furthermore, this integration is not endorsed by Brunata, and could stop functioning at any time at their behest; your Brunata account might also be closed, although no EULA is provided for the Brunata Online Portal at the time of writing
-
 [![hacs][hacsbadge]][hacs]
 [![GitHub Release][releases-shield]][releases]
 [![License][license-shield]](LICENSE)
@@ -11,6 +7,12 @@ Furthermore, this integration is not endorsed by Brunata, and could stop functio
 <!-- Sponsors -->
 
 [![ko-fi][kofi_badge]](https://ko-fi.com/X8X3205KS)
+
+## ⚠️ This integration is still a work in progress ⚠️
+
+Furthermore, this integration is not endorsed by Brunata, and could stop functioning at any time at their behest; your Brunata account might also be closed, although no EULA is provided for the Brunata Online Portal at the time of writing
+
+---
 
 ## ⚠️ Please ensure your Brunata credentials work on [online.brunata.com][brunata] ⚠️
 
@@ -21,7 +23,7 @@ In most cases, you will likely have to add support for alternate portals yoursel
 ---
 
 This integration allows Home Assistant to read meter values from the [Brunata Online][brunata] Portal.
-Brunata is a "IoT-enabled" utilities provider that's part of the "Minol-ZENNER Group", mostly providing utilities to housing cooperatives in the EEA
+Brunata is an IoT-enabled utilities provider that's part of the Minol-ZENNER Group, mostly providing utilities to housing cooperatives in the EEA
 
 ### ✨ Planned Features
 
@@ -37,13 +39,13 @@ Brunata is a "IoT-enabled" utilities provider that's part of the "Minol-ZENNER G
 
 - [ ] Support writing historical metrics to sensor
 
-#### The integration can fetch the following metrics
+### The integration can fetch the following metrics
 
 - 📊 Available meter types — ⚠️ Only tested on my own account ⚠️
 
 - ⚡ Energy meter
 
-#### The following Home Assistant sensors have been implemented
+### The following Home Assistant sensors have been implemented
 
 ⚠️ No sensors have been implemented yet ⚠️
 
