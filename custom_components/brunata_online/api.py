@@ -37,13 +37,10 @@ class BrunataOnlineApiClient:
     def get_new_tokens(self) -> None:
         # Check values
         if self._tokens:
-            if (
-                datetime.fromtimestamp(self._tokens.get("expires_on"))
-                > datetime.utcnow()
-            ):
+            if datetime.fromtimestamp(self._tokens.get("expires_on")) > datetime.now():
                 _LOGGER.debug(
                     "Token is not expired, expires in %d seconds",
-                    self._tokens.get("expires_on") - int(datetime.utcnow().timestamp()),
+                    self._tokens.get("expires_on") - int(datetime.now().timestamp()),
                 )
             else:  # TODO: Stitch together some code to check expiry of refresh token
                 _LOGGER.debug("Access Token is expired, continuing")
@@ -146,13 +143,10 @@ class BrunataOnlineApiClient:
             _LOGGER.error("Attempted to renew tokens when no tokens are stored")
             return
         else:
-            if (
-                datetime.fromtimestamp(self._tokens.get("expires_on"))
-                > datetime.utcnow()
-            ):
+            if datetime.fromtimestamp(self._tokens.get("expires_on")) > datetime.now():
                 _LOGGER.debug(
                     "Access token is not expired, expires in %d seconds",
-                    self._tokens.get("expires_on") - int(datetime.utcnow().timestamp()),
+                    self._tokens.get("expires_on") - int(datetime.now().timestamp()),
                 )
                 return
             else:  # TODO: Implement check of refresh_token expiry
@@ -200,13 +194,13 @@ class BrunataOnlineApiClient:
         return meters or {}
 
     def start_of_month(self) -> str:
-        first_day = datetime.utcnow().replace(
+        first_day = datetime.now().replace(
             day=1, hour=0, minute=0, second=0, microsecond=0
         )
         return f"{first_day.isoformat()}.000Z"
 
     def end_of_month(self) -> str:
-        end = datetime.utcnow().replace(day=28) + timedelta(days=4)
+        end = datetime.now().replace(day=28) + timedelta(days=4)
         end -= timedelta(days=end.day)
         end = end.replace(hour=23, minute=59, second=59, microsecond=0)
         return f"{end.isoformat()}.999Z"
