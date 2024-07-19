@@ -30,9 +30,9 @@ class BrunataOnlineApiClient:
         self._username = username
         self._password = password
         self._session = Session()
-        self._power = False
-        self._water = False
-        self._heating = False
+        self._power = {}
+        self._water = {}
+        self._heating = {}
         self._tokens = {}
         self._session.headers.update(HEADERS)
 
@@ -161,9 +161,7 @@ class BrunataOnlineApiClient:
             if tokens.get("refresh_token") != self._tokens.get("refresh_token"):
                 tokens.update(
                     {
-                        "refresh_token_expires_on": int(
-                            datetime.datetime.now().timestamp()
-                        )
+                        "refresh_token_expires_on": int(datetime.now().timestamp())
                         + tokens.get("refresh_token_expires_in")
                     }
                 )
@@ -172,7 +170,7 @@ class BrunataOnlineApiClient:
             _LOGGER.error("Failed to get tokens")
             self._tokens = {}
 
-    def get_available_meters(self) -> dict:
+    def get_meters(self) -> None:
         meters = self.api_wrapper(
             "GET",
             url=f"{BASE_URL}/consumer/superallocationunits",
@@ -181,39 +179,37 @@ class BrunataOnlineApiClient:
             },
         ).json()
         units = meters[0].get("allocationUnits")
-        _LOGGER.info("Meter info:\n%s", str(meters))
-        _LOGGER.debug("allocationUnits: %s", str(units))
+        _LOGGER.info("Meter info: %s", str(meters))
         # TODO: Check if these values are consistent with other users
-        if ConsumptionType.POWER in units:
+        if ConsumptionType.POWER.value in units:
             _LOGGER.debug("Energy meter(s) found ⚡")
-            self._power = True
-        if ConsumptionType.WATER in units:
+            self._power.update({"Enable": True})
+        if ConsumptionType.WATER.value in units:
             _LOGGER.debug("Water meter(s) found 💧")
-            self._water = True
-        if ConsumptionType.HEATING in units:
+            self._water.update({"Enable": True})
+        if ConsumptionType.HEATING.value in units:
             _LOGGER.debug("Heating meter(s) found 🔥")
-            self._heating = True
-        return meters or {}
+            self._heating.update({"Enable": True})
 
     def start_of_interval(self, interval: Interval) -> str:
         """Returns start of year if interval is "M", otherwise start of month"""
         start = datetime.now()
         if interval is Interval.MONTH:
-            start.replace(month=1)
-        start.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            start = start.replace(month=1)
+        start = start.replace(day=1, hour=0, minute=0, second=0, microsecond=0)
         return f"{start.isoformat()}.000Z"
 
     def end_of_interval(self, interval: Interval) -> str:
         """Returns end of year if interval is "M", otherwise end of month"""
         end = datetime.now()
         if interval is Interval.MONTH:
-            end.replace(month=12)
-        end.replace(day=28) + timedelta(days=4)
+            end = end.replace(month=12)
+        end = end.replace(day=28) + timedelta(days=4)
         end -= timedelta(days=end.day)
         end = end.replace(hour=23, minute=59, second=59, microsecond=0)
         return f"{end.isoformat()}.999Z"
 
-    def get_consumption(self, unit: ConsumptionType, interval: Interval) -> dict | None:
+    def get_consumption(self, unit: ConsumptionType, interval: Interval) -> None:
         match (unit):
             case ConsumptionType.POWER:
                 if not self._power:
@@ -233,18 +229,30 @@ class BrunataOnlineApiClient:
             params={
                 "startdate": self.start_of_interval(interval),
                 "enddate": self.end_of_interval(interval),
-                "interval": interval,
-                "allocationunit": unit,
+                "interval": interval.value,
+                "allocationunit": unit.value,
             },
             headers={
                 "Referer": "https://online.brunata.com/consumption-overview",
             },
         ).json()
-        _LOGGER.info("This month's daily energy consumption:")
+        _LOGGER.info(
+            "%s consumption for the %s:",
+            unit.name.capitalize(),
+            interval.name.capitalize(),
+        )
+        match (unit):
+            case ConsumptionType.POWER:
+                usage = self._power
+            case ConsumptionType.WATER:
+                usage = self._water
+            case ConsumptionType.HEATING:
+                usage = self._heating
         for e in consumption["consumptionLines"][0]["consumptionValues"]:
             if e.get("consumption") is not None:
-                _LOGGER.info("%s: %s kWh", e.get("fromDate")[:10], e.get("consumption"))
-        return consumption or {}
+                _period = e.get("fromDate")[: (10 if interval is Interval.DAY else 7)]
+                _LOGGER.info("%s: %s kWh", _period, e.get("consumption"))
+                usage.update({_period: e.get("consumption")})
 
     def api_wrapper(self, method: str, **args) -> Response:
         """Get information from the API."""
