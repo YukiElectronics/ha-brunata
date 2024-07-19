@@ -31,7 +31,7 @@ Brunata is an IoT-enabled utilities provider that's part of the Minol-ZENNER Gro
 
   - [ ] 💧 Water consumption
 
-  - [ ] 🔥 District heating / gas consumption
+  - [/] 🔥 District heating / gas consumption
 
 - [ ] Expose metrics as Home Assistant sensors
 
@@ -41,9 +41,11 @@ Brunata is an IoT-enabled utilities provider that's part of the Minol-ZENNER Gro
 
 ### The integration can fetch the following metrics
 
-- 📊 Available meter types — ⚠️ Only tested on my own account ⚠️
+- 📊 Available meter types — ⚠️ Only tested on two accounts so far ⚠️
 
-- ⚡ Energy meter
+- ⚡ Energy meters
+
+- 🔥 Heating meters — Thanks to [WallyR](https://community.home-assistant.io/u/wallyr) on the Home Assistant Community forum
 
 ### The following Home Assistant sensors have been implemented
 

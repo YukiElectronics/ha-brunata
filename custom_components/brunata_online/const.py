@@ -64,9 +64,12 @@ If you have any issues with this you need to open an issue here:
 
 
 class ConsumptionType(Enum):
-    POWER = "E"
+    # 🔥 SuperAllocationUnit 1
+    HEATING = "O"
+    # 💧 SuperAllocationUnit 2? ⚠️ THIS IS A GUESS
     WATER = "V"
-    HEATING = "W"
+    # ⚡ SuperAllocationUnit = 3
+    ELECTRICITY = "E"
 
 
 class Interval(Enum):
