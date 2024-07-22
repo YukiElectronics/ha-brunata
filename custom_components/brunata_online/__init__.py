@@ -2,7 +2,7 @@
 Custom integration to integrate Brunata Online with Home Assistant.
 
 For more details about this integration, please refer to
-https://github.com/YukiElectronics/brunata-online
+https://github.com/YukiElectronics/ha-brunata
 """
 
 import asyncio
