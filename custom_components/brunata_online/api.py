@@ -1,4 +1,4 @@
-""" Brunata Online API Client """
+"""Brunata Online API Client"""
 
 import base64
 from datetime import datetime, timedelta
@@ -37,6 +37,7 @@ class BrunataOnlineApiClient:
         self._session.headers.update(HEADERS)
 
     def get_tokens(self) -> None:
+        """Get access/refresh tokens using credentials or refresh token."""
         # Check values
         if (
             self._tokens
@@ -58,11 +59,7 @@ class BrunataOnlineApiClient:
                     "refresh_token": self._tokens.get("refresh_token"),
                     "CLIENT_ID": CLIENT_ID,
                 },
-            ).json()
-            if not tokens.get("access_token"):
-                _LOGGER.error("Failed to renew existing tokens")
-                self._tokens = {}
-                return
+            )
         else:
             # Initialize challenge values
             code_verifier = base64.urlsafe_b64encode(os.urandom(40)).decode("utf-8")
@@ -149,7 +146,8 @@ class BrunataOnlineApiClient:
                     "code": auth_code,
                     "code_verifier": code_verifier,
                 },
-            ).json()
+            )
+        tokens = tokens.json()
         if tokens.get("access_token"):
             # Add access token to session headers
             self._session.headers.update(
@@ -169,8 +167,10 @@ class BrunataOnlineApiClient:
         else:
             _LOGGER.error("Failed to get tokens")
             self._tokens = {}
+            raise Exception("Failed to get tokens")
 
     def get_meters(self) -> None:
+        self.get_tokens()
         meters = self.api_wrapper(
             "GET",
             url=f"{BASE_URL}/consumer/superallocationunits",
@@ -210,7 +210,8 @@ class BrunataOnlineApiClient:
         return f"{end.isoformat()}.999Z"
 
     def get_consumption(self, unit: ConsumptionType, interval: Interval) -> None:
-        match (unit):
+        self.get_tokens()
+        match unit:
             case ConsumptionType.ELECTRICITY:
                 if not self._power:
                     _LOGGER.debug("🌃 No energy meter was found")
@@ -241,7 +242,7 @@ class BrunataOnlineApiClient:
             unit.name.capitalize(),
             interval.name.capitalize(),
         )
-        match (unit):
+        match unit:
             case ConsumptionType.ELECTRICITY:
                 usage = self._power
             case ConsumptionType.WATER:
@@ -249,27 +250,41 @@ class BrunataOnlineApiClient:
             case ConsumptionType.HEATING:
                 usage = self._heating
         _LOGGER.debug("Interval: %s", interval.name.lower())
-        for index, meter in enumerate(consumption["consumptionLines"]):
-            _e = {"Name": meter.get("meter").get("placement") or index}
-            _LOGGER.info("Meter: %s", _e["Name"])
-            for e in meter["consumptionValues"]:
-                if e.get("consumption") is not None:
-                    _period = e.get("fromDate")[
-                        : (10 if interval is Interval.DAY else 7)
-                    ]
-                    _LOGGER.info("%s: %s units", _period, e.get("consumption"))
-                    _e.update({_period: e.get("consumption")})
-            meter_id = meter.get("meter").get("meterId") or index
-            usage["Meters"][interval.name.capitalize()].update({meter_id: _e})
+
+        def get_date(x):
+            return x.get("fromDate")[: 10 if interval is Interval.DAY else 7]
+
+        usage["Meters"][interval.name.capitalize()].update(
+            {
+                meter.get("meter").get("meterId")
+                or index: {
+                    "Name": meter.get("meter").get("placement") or index,
+                    "Values": {
+                        get_date(entry): entry.get("consumption")
+                        for entry in meter["consumptionValues"]
+                        if entry.get("consumption") is not None
+                    },
+                }
+                for index, meter in enumerate(consumption["consumptionLines"])
+            }
+        )
 
     def api_wrapper(self, method: str, **args) -> Response:
         """Get information from the API."""
         match method:
             case "GET":
-                return self._session.get(**args)
+                http = self._session.get(**args)
+                http.raise_for_status()
+                return http
             case "POST":
-                return self._session.post(**args)
+                http = self._session.post(**args)
+                http.raise_for_status()
+                return http
             case "PUT":
-                return self._session.put(**args)
+                http = self._session.put(**args)
+                http.raise_for_status()
+                return http
             case "PATCH":
-                return self._session.patch(**args)
+                http = self._session.patch(**args)
+                http.raise_for_status()
+                return http
