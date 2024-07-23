@@ -12,8 +12,6 @@
 
 Furthermore, this integration is not endorsed by Brunata, and could stop functioning at any time at their behest; your Brunata account might also be closed, although no EULA is provided for the Brunata Online Portal at the time of writing
 
----
-
 ## ⚠️ Please ensure your Brunata credentials work on [online.brunata.com][brunata] ⚠️
 
 If your credentials don't work **AND** you use a different Brunata portal to view your metrics, please open a pull request and/or contact me on the [Home Assistant Forum][ha_profile].
@@ -27,11 +25,11 @@ Brunata is an IoT-enabled utilities provider that's part of the Minol-ZENNER Gro
 
 ### ✨ Planned Features
 
-- [ ] Add support for more metrics
+- [x] Add support for more metrics
 
-  - [ ] 💧 Water consumption
+  - [x] 💧 Water consumption
 
-  - [/] 🔥 District heating / gas consumption
+  - [x] 🔥 District heating / gas consumption
 
 - [ ] Expose metrics as Home Assistant sensors
 
@@ -44,6 +42,8 @@ Brunata is an IoT-enabled utilities provider that's part of the Minol-ZENNER Gro
 - 📊 Available meter types — ⚠️ Only tested on two accounts so far ⚠️
 
 - ⚡ Energy meters
+
+- 💧 Water meters — ⚠️ UNTESTED ⚠️
 
 - 🔥 Heating meters — Thanks to [WallyR](https://community.home-assistant.io/u/wallyr) on the Home Assistant Community forum
 

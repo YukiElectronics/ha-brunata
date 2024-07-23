@@ -56,7 +56,7 @@ class BrunataOnlineApiClient:
                 "Token is not expired, expires in %d seconds",
                 self._tokens.get("expires_on") - int(datetime.now().timestamp()),
             )
-            return
+            return self._tokens
         # Get OAuth 2.0 token object
         try:
             tokens = self.api_wrapper(
@@ -204,19 +204,31 @@ class BrunataOnlineApiClient:
                 "Referer": "https://online.brunata.com/consumption-overview",
             },
         ).json()
-        # TODO: Switch to checking "superAllocationUnits" instead!
-        units = meters[0].get("allocationUnits")
+        water_units = []
+        heating_units = []
+        power_units = []
+        for meter in meters:
+            match meter.get("superAllocationUnit"):
+                case 1:  # Heating
+                    heating_units += meter.get("allocationUnits")
+                case 2:  # Water
+                    water_units += meter.get("allocationUnits")
+                case 3:  # Electricity
+                    power_units += meter.get("allocationUnits")
         _LOGGER.info("Meter info: %s", str(meters))
         init = {"Meters": {"Day": {}, "Month": {}}}
-        if ConsumptionType.ELECTRICITY.value in units:
-            _LOGGER.debug("⚡ Energy meter(s) found")
-            self._power.update(init)
-        if ConsumptionType.WATER.value in units:
-            _LOGGER.debug("💧 Water meter(s) found")
-            self._water.update(init)
-        if ConsumptionType.HEATING.value in units:
+        if heating_units:
             _LOGGER.debug("🔥 Heating meter(s) found")
             self._heating.update(init)
+            self._heating.update({"Units": heating_units})
+        if water_units:
+            _LOGGER.debug("💧 Water meter(s) found")
+            self._water.update(init)
+            self._water.update({"Units": water_units})
+        if power_units:
+            _LOGGER.debug("⚡ Energy meter(s) found")
+            self._power.update(init)
+            self._power.update({"Units": power_units})
 
     def start_of_interval(self, interval: Interval) -> str:
         """Returns start of year if interval is "M", otherwise start of month"""
@@ -236,63 +248,50 @@ class BrunataOnlineApiClient:
         end = end.replace(hour=23, minute=59, second=59, microsecond=0)
         return f"{end.isoformat()}.999Z"
 
-    def get_consumption(self, unit: ConsumptionType, interval: Interval) -> None:
+    def get_consumption(self, _type: ConsumptionType, interval: Interval) -> None:
         self.get_tokens()
-        match unit:
-            case ConsumptionType.ELECTRICITY:
-                if not self._power:
-                    _LOGGER.debug("🌃 No energy meter was found")
-                    return
-            case ConsumptionType.WATER:
-                if not self._water:
-                    _LOGGER.debug("🏜️ No water meter was found")
-                    return
-            case ConsumptionType.HEATING:
-                if not self._heating:
-                    _LOGGER.debug("❄️ No heating meter was found")
-                    return
-        consumption = self.api_wrapper(
-            method="GET",
-            url=f"{BASE_URL}/consumer/consumption",
-            params={
-                "startdate": self.start_of_interval(interval),
-                "enddate": self.end_of_interval(interval),
-                "interval": interval.value,
-                "allocationunit": unit.value,  # TODO: Get allocationUnit dynamically instead
-            },
-            headers={
-                "Referer": f"https://online.brunata.com/consumption-overview/{unit.name.lower()}",
-            },
-        ).json()
-        _LOGGER.info(
-            "%s consumption for the %s:",
-            unit.name.capitalize(),
-            interval.name.capitalize(),
-        )
-        match unit:
+        match _type:
             case ConsumptionType.ELECTRICITY:
                 usage = self._power
             case ConsumptionType.WATER:
                 usage = self._water
             case ConsumptionType.HEATING:
                 usage = self._heating
-        _LOGGER.debug("Interval: %s", interval.name.lower())
-
-        def get_date(x):
-            return x.get("fromDate")[: 10 if interval is Interval.DAY else 7]
-
+        if not usage:
+            _LOGGER.debug("No %s meter was found", _type.name.lower())
+            return
+        consumption = [
+            self.api_wrapper(
+                method="GET",
+                url=f"{BASE_URL}/consumer/consumption",
+                params={
+                    "startdate": self.start_of_interval(interval),
+                    "enddate": self.end_of_interval(interval),
+                    "interval": interval.value,
+                    "allocationunit": unit,
+                },
+                headers={
+                    "Referer": f"https://online.brunata.com/consumption-overview/{_type.name.lower()}",
+                },
+            ).json()
+            for unit in usage["Units"]
+        ]
+        # Add all metrics that are not None
         usage["Meters"][interval.name.capitalize()].update(
             {
                 meter.get("meter").get("meterId")
                 or index: {
                     "Name": meter.get("meter").get("placement") or index,
                     "Values": {
-                        get_date(entry): entry.get("consumption")
+                        entry.get("fromDate")[
+                            : 10 if interval is Interval.DAY else 7
+                        ]: entry.get("consumption")
                         for entry in meter["consumptionValues"]
                         if entry.get("consumption") is not None
                     },
                 }
-                for index, meter in enumerate(consumption["consumptionLines"])
+                for lines in consumption
+                for index, meter in enumerate(lines["consumptionLines"])
             }
         )
 
