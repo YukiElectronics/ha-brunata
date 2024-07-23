@@ -8,7 +8,7 @@ import os
 import re
 import urllib.parse
 
-from requests import Session, Response
+from requests import Session, Response, HTTPError
 
 from .const import (
     B2C_URL,
@@ -36,23 +36,31 @@ class BrunataOnlineApiClient:
         self._tokens = {}
         self._session.headers.update(HEADERS)
 
-    def get_tokens(self) -> None:
-        """Get access/refresh tokens using credentials or refresh token."""
-        # Check values
-        if (
-            self._tokens
-            and datetime.fromtimestamp(self._tokens.get("refresh_token_expires_on"))
-            > datetime.now()
-        ):
-            if datetime.fromtimestamp(self._tokens.get("expires_on")) > datetime.now():
-                _LOGGER.debug(
-                    "Token is not expired, expires in %d seconds",
-                    self._tokens.get("expires_on") - int(datetime.now().timestamp()),
-                )
-                return
-            # Get OAuth 2.0 token object
+    def _is_token_valid(self, token: str) -> bool:
+        if not self._tokens:
+            return False
+        match token:
+            case "access_token":
+                ts = self._tokens.get("expires_on")
+                if datetime.fromtimestamp(ts) < datetime.now():
+                    return False
+            case "refresh":
+                ts = self._tokens.get("refresh_token_expires_on")
+                if datetime.fromtimestamp(ts) < datetime.now():
+                    return False
+        return True
+
+    def _renew_tokens(self) -> dict:
+        if self._is_token_valid("access_token"):
+            _LOGGER.debug(
+                "Token is not expired, expires in %d seconds",
+                self._tokens.get("expires_on") - int(datetime.now().timestamp()),
+            )
+            return
+        # Get OAuth 2.0 token object
+        try:
             tokens = self.api_wrapper(
-                "POST",
+                method="POST",
                 url=f"{OAUTH2_URL}/token",
                 data={
                     "grant_type": "refresh_token",
@@ -60,67 +68,71 @@ class BrunataOnlineApiClient:
                     "CLIENT_ID": CLIENT_ID,
                 },
             )
+        except HTTPError as error:
+            _LOGGER.error("An error occurred while trying to renew tokens: %s", error)
+            return {}
+        return tokens.json()
+
+    def _b2c_auth(self) -> dict:
+        # Initialize challenge values
+        code_verifier = base64.urlsafe_b64encode(os.urandom(40)).decode("utf-8")
+        code_verifier = re.sub("[^a-zA-Z0-9]+", "", code_verifier)
+        code_challenge = hashlib.sha256(code_verifier.encode("utf-8")).digest()
+        code_challenge = (
+            base64.urlsafe_b64encode(code_challenge).decode("utf-8").replace("=", "")
+        )
+        # Initial authorization call
+        req_code = self.api_wrapper(
+            method="GET",
+            url=f"{BASE_URL.replace('webservice', 'auth-webservice')}/authorize",
+            params={
+                "client_id": CLIENT_ID,
+                "redirect_uri": REDIRECT,
+                "scope": f"{CLIENT_ID} offline_access",
+                "response_type": "code",
+                "code_challenge": code_challenge,
+                "code_challenge_method": "S256",
+            },
+        )
+        # Get CSRF Token & Transaction ID
+        try:
+            csrf_token = req_code.cookies.get("x-ms-cpim-csrf")
+        except Exception as exception:
+            _LOGGER.error("Error while retrieving CSRF Token: %s", exception)
+            return
+        match = re.search(r"var SETTINGS = (\{[^;]*\});", req_code.text)
+        if match:  # Use a little magic to avoid proper JSON parsing ✨
+            transId = [
+                i for i in match.group(1).split('","') if i.startswith("transId")
+            ][0][10:]
+            _LOGGER.debug("Transaction ID: %s", transId)
         else:
-            # Initialize challenge values
-            code_verifier = base64.urlsafe_b64encode(os.urandom(40)).decode("utf-8")
-            code_verifier = re.sub("[^a-zA-Z0-9]+", "", code_verifier)
-            code_challenge = hashlib.sha256(code_verifier.encode("utf-8")).digest()
-            code_challenge = (
-                base64.urlsafe_b64encode(code_challenge)
-                .decode("utf-8")
-                .replace("=", "")
-            )
-            # Initial authorization call
-            req_code = self.api_wrapper(
-                "GET",
-                url=f"{BASE_URL.replace('webservice', 'auth-webservice')}/authorize",
-                params={
-                    "client_id": CLIENT_ID,
-                    "redirect_uri": REDIRECT,
-                    "scope": f"{CLIENT_ID} offline_access",
-                    "response_type": "code",
-                    "code_challenge": code_challenge,
-                    "code_challenge_method": "S256",
-                },
-            )
-            # Get CSRF Token & Transaction ID
-            try:
-                csrf_token = req_code.cookies.get("x-ms-cpim-csrf")
-            except Exception as exception:
-                _LOGGER.error("Error while retrieving CSRF Token: %s", exception)
-                return
-            match = re.search(r"var SETTINGS = (\{[^;]*\});", req_code.text)
-            if match:  # Use a little magic to avoid proper JSON parsing ✨
-                transId = [
-                    i for i in match.group(1).split('","') if i.startswith("transId")
-                ][0][10:]
-                _LOGGER.debug("Transaction ID: %s", transId)
-            else:
-                _LOGGER.error("Failed to get Transaction ID")
-                return
-            # Post credentials to B2C Endpoint
+            _LOGGER.error("Failed to get Transaction ID")
+            return
+        # Post credentials to B2C Endpoint
+        req_auth = self.api_wrapper(
+            method="POST",
+            url=f"{B2C_URL}/SelfAsserted",
+            params={
+                "tx": transId,
+                "p": OAUTH2_PROFILE,
+            },
+            data={
+                "request_type": "RESPONSE",
+                "logonIdentifier": self._username,
+                "password": self._password,
+            },
+            headers={
+                "Referer": req_code.url,
+                "X-Csrf-Token": csrf_token,
+                "X-Requested-With": "XMLHttpRequest",
+            },
+            allow_redirects=False,
+        )
+        # Get authentication code
+        try:
             req_auth = self.api_wrapper(
-                "POST",
-                url=f"{B2C_URL}/SelfAsserted",
-                params={
-                    "tx": transId,
-                    "p": OAUTH2_PROFILE,
-                },
-                data={
-                    "request_type": "RESPONSE",
-                    "logonIdentifier": self._username,
-                    "password": self._password,
-                },
-                headers={
-                    "Referer": req_code.url,
-                    "X-Csrf-Token": csrf_token,
-                    "X-Requested-With": "XMLHttpRequest",
-                },
-                allow_redirects=False,
-            )
-            # Get authentication code
-            req_auth = self.api_wrapper(
-                "GET",
+                method="GET",
                 url=f"{B2C_URL}/api/CombinedSigninAndSignup/confirmed",
                 params={
                     "rememberMe": False,
@@ -130,24 +142,38 @@ class BrunataOnlineApiClient:
                 },
                 allow_redirects=False,
             )
-            redirect = req_auth.headers["Location"]
-            assert redirect.startswith(REDIRECT)
-            auth_code = urllib.parse.parse_qs(urllib.parse.urlparse(redirect).query)[
-                "code"
-            ][0]
-            # Get OAuth 2.0 token object
-            tokens = self.api_wrapper(
-                "POST",
-                url=f"{OAUTH2_URL}/token",
-                data={
-                    "grant_type": "authorization_code",
-                    "client_id": CLIENT_ID,
-                    "redirect_uri": REDIRECT,
-                    "code": auth_code,
-                    "code_verifier": code_verifier,
-                },
+        except HTTPError as error:
+            _LOGGER.error(
+                "An error has occurred while attempting to authenticate: %s", error
             )
-        tokens = tokens.json()
+            return {}
+        redirect = req_auth.headers["Location"]
+        assert redirect.startswith(REDIRECT)
+        auth_code = urllib.parse.parse_qs(urllib.parse.urlparse(redirect).query)[
+            "code"
+        ][0]
+        # Get OAuth 2.0 token object
+        tokens = self.api_wrapper(
+            method="POST",
+            url=f"{OAUTH2_URL}/token",
+            data={
+                "grant_type": "authorization_code",
+                "client_id": CLIENT_ID,
+                "redirect_uri": REDIRECT,
+                "code": auth_code,
+                "code_verifier": code_verifier,
+            },
+        )
+        return tokens.json()
+
+    def get_tokens(self) -> None:
+        """Get access/refresh tokens using credentials or refresh token."""
+        # Check values
+        if self._is_token_valid("refresh_token"):
+            tokens = self._renew_tokens()
+        else:
+            tokens = self._b2c_auth()
+        # Ensure validity of tokens
         if tokens.get("access_token"):
             # Add access token to session headers
             self._session.headers.update(
@@ -165,14 +191,14 @@ class BrunataOnlineApiClient:
                 )
             self._tokens.update(tokens)
         else:
-            _LOGGER.error("Failed to get tokens")
             self._tokens = {}
+            _LOGGER.error("Failed to get tokens")
             raise Exception("Failed to get tokens")
 
     def get_meters(self) -> None:
         self.get_tokens()
         meters = self.api_wrapper(
-            "GET",
+            method="GET",
             url=f"{BASE_URL}/consumer/superallocationunits",
             headers={
                 "Referer": "https://online.brunata.com/consumption-overview",
@@ -181,15 +207,16 @@ class BrunataOnlineApiClient:
         # TODO: Switch to checking "superAllocationUnits" instead!
         units = meters[0].get("allocationUnits")
         _LOGGER.info("Meter info: %s", str(meters))
+        init = {"Meters": {"Day": {}, "Month": {}}}
         if ConsumptionType.ELECTRICITY.value in units:
             _LOGGER.debug("⚡ Energy meter(s) found")
-            self._power.update({"Meters": {"Day": {}, "Month": {}}})
+            self._power.update(init)
         if ConsumptionType.WATER.value in units:
             _LOGGER.debug("💧 Water meter(s) found")
-            self._water.update({"Meters": {"Day": {}, "Month": {}}})
+            self._water.update(init)
         if ConsumptionType.HEATING.value in units:
             _LOGGER.debug("🔥 Heating meter(s) found")
-            self._heating.update({"Meters": {"Day": {}, "Month": {}}})
+            self._heating.update(init)
 
     def start_of_interval(self, interval: Interval) -> str:
         """Returns start of year if interval is "M", otherwise start of month"""
@@ -225,7 +252,7 @@ class BrunataOnlineApiClient:
                     _LOGGER.debug("❄️ No heating meter was found")
                     return
         consumption = self.api_wrapper(
-            "GET",
+            method="GET",
             url=f"{BASE_URL}/consumer/consumption",
             params={
                 "startdate": self.start_of_interval(interval),
@@ -269,22 +296,8 @@ class BrunataOnlineApiClient:
             }
         )
 
-    def api_wrapper(self, method: str, **args) -> Response:
+    def api_wrapper(self, **args) -> Response:
         """Get information from the API."""
-        match method:
-            case "GET":
-                http = self._session.get(**args)
-                http.raise_for_status()
-                return http
-            case "POST":
-                http = self._session.post(**args)
-                http.raise_for_status()
-                return http
-            case "PUT":
-                http = self._session.put(**args)
-                http.raise_for_status()
-                return http
-            case "PATCH":
-                http = self._session.patch(**args)
-                http.raise_for_status()
-                return http
+        http = self._session.request(**args)
+        http.raise_for_status()
+        return http
