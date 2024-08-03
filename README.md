@@ -43,7 +43,7 @@ Brunata is an IoT-enabled utilities provider that's part of the Minol-ZENNER Gro
 
 - ⚡ Energy meters
 
-- 💧 Water meters — ⚠️ UNTESTED ⚠️
+- 💧 Water meters
 
 - 🔥 Heating meters — Thanks to [WallyR](https://community.home-assistant.io/u/wallyr) on the Home Assistant Community forum
 
