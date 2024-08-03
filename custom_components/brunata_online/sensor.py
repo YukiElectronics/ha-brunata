@@ -10,9 +10,13 @@ from .entity import BrunataOnlineEntity
 async def async_setup_entry(hass, entry, async_add_devices):
     """Setup sensor platform."""
     coordinator = hass.data[DOMAIN][entry.entry_id]
-    async_add_devices([BrunataOnlineEnergySensor(coordinator, entry)])
-    async_add_devices([BrunataOnlineWaterSensor(coordinator, entry)])
-    async_add_devices([BrunataOnlineHeatingSensor(coordinator, entry)])
+    async_add_devices(
+        [
+            BrunataOnlineEnergySensor(coordinator, entry),
+            BrunataOnlineWaterSensor(coordinator, entry),
+            BrunataOnlineHeatingSensor(coordinator, entry),
+        ]
+    )
 
 
 class BrunataOnlineEnergySensor(BrunataOnlineEntity):
