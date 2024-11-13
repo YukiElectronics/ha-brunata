@@ -12,7 +12,7 @@
 
 Furthermore, this integration is not endorsed by Brunata, and could stop functioning at any time at their behest; your Brunata account might also be closed, although no EULA is provided for the Brunata Online Portal at the time of writing
 
-## ⚠️ Please ensure your Brunata credentials work on [online.brunata.com][brunata] ⚠️
+## ⚠️ Please ensure your credentials work on [online.brunata.com][brunata] ⚠️
 
 If your credentials don't work **AND** you use a different Brunata portal to view your metrics, please open a pull request and/or contact me on the [Home Assistant Forum][ha_profile].
 
