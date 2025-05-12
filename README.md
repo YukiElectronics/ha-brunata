@@ -8,7 +8,9 @@
 
 [![ko-fi][kofi_badge]](https://ko-fi.com/X8X3205KS)
 
-## ⚠️ This integration is still a work in progress ⚠️
+## ⚠️ DO NOT INSTALL, THIS INTEGRATION DOES NOT WORK YET. I AM NOT RESPONSIBLE FOR ANY HARM CAUSED BY INSTALLING THIS INTEGRATION ⚠️
+
+**This integration is still a work in progress.**
 
 Furthermore, this integration is not endorsed by Brunata, and could stop functioning at any time at their behest; your Brunata account might also be closed, although no EULA is provided for the Brunata Online Portal at the time of writing
 
